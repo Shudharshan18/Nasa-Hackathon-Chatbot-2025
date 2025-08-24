@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patutaa-Fossil Fuel Emissions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='fav.png') }}">
+    <style>
+        @property --angle {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
+        }
+
+        :root {
+            --bg-color: #010409;
+            --primary-color: #38bdf8;
+            --secondary-color: #8b949e;
+            --card-bg: #161b22;
+            --border-color: rgba(56, 189, 248, 0.2);
+            --text-color: #e6edf3;
+            --heading-font: 'Lora', serif;
+            --body-font: 'Poppins', sans-serif;
+            --glow-1: #0ea5e9;
+            --glow-2: #6366f1;
+            --glow-3: #a855f7;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--body-font);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .content-wrapper { position: relative; z-index: 2; }
+
+        /* --- 1. Navbar --- */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: rgba(1, 4, 9, 0.7);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000; padding: 1rem 5%; box-sizing: border-box;
+            transition: top 0.4s ease-in-out;
+        }
+        .navbar.nav-hidden { top: -100px; }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .nav-logo { color: var(--primary-color); font-weight: 700; font-size: 1.5rem; text-decoration: none; }
+        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: 2rem; align-items: center; }
+        .nav-links a { color: var(--secondary-color); text-decoration: none; font-weight: 600; padding: 0.5rem; transition: color 0.3s ease; }
+        .nav-links a:hover, .nav-links a.active { color: white; }
+        .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 0; }
+        .nav-toggle .icon { stroke: white; width: 28px; height: 28px; }
+        
+        /* --- 2. Hero Section --- */
+        .hero {
+            position: relative;
+            height: 70vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .hero h1 {
+            font-family: var(--heading-font);
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            color: white; margin: 0; line-height: 1.2;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+         .hero h1 span {
+            display: inline-block; opacity: 0; transform: translateY(50px) rotate(10deg);
+            animation: reveal-word 0.8s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .hero h1 span:nth-child(2) { animation-delay: 0.1s; }
+        @keyframes reveal-word { to { opacity: 1; transform: translateY(0) rotate(0); } }
+
+        /* --- 3. Main Content Section --- */
+        .main-section {
+            padding: 50px 5%;
+            max-width: 1200px; margin: auto; text-align: center;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            perspective: 2000px;
+        }
+
+        /* --- 3D Aurora Card Styling --- */
+        .card {
+            --angle: 0deg;
+            position: relative; padding: 3px; border-radius: 15px;
+            background: conic-gradient(from var(--angle), var(--glow-3), var(--glow-2), var(--glow-1), var(--glow-2), var(--glow-3));
+            animation: rotate-glow 10s linear infinite; transform-style: preserve-3d;
+            transition: transform 0.4s ease-out, box-shadow 0.4s ease-out;
+            will-change: transform;
+        }
+        .card:hover {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        @keyframes rotate-glow { to { --angle: 360deg; } }
+
+        .card-inner {
+            background: var(--card-bg); padding: 30px; border-radius: 12px;
+            height: 100%; box-sizing: border-box; text-align: left;
+            transform: translateZ(20px);
+        }
+        .card h2 {
+            font-family: var(--heading-font);
+            font-size: 1.8rem;
+            margin-top: 0; margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+        .card ul { list-style: none; padding: 0; margin: 0; }
+        .card ul li {
+            padding-left: 1.5rem;
+            position: relative;
+            margin-bottom: 0.8rem;
+            color: var(--text-dim);
+            line-height: 1.7;
+        }
+        .card ul li::before {
+            content: '›';
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.2rem;
+            top: -2px;
+        }
+        .card p {
+            line-height: 1.7;
+            color: var(--text-dim);
+        }
+
+        /* --- 4. Footer --- */
+        .footer {
+            padding: 3rem 5%; text-align: center; margin-top: 80px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .footer p { margin-bottom: 1.5rem; color: var(--secondary-color); }
+        .social-links { display: flex; justify-content: center; gap: 20px; }
+        .social-links a { color: var(--secondary-color); transition: color 0.3s, transform 0.3s; }
+        .social-links a:hover { color: var(--primary-color); transform: translateY(-3px); }
+        .social-links svg { width: 24px; height: 24px; }
+        
+        /* --- General Reveal Animation --- */
+        .reveal {
+            opacity: 0; transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .reveal.in-view { opacity: 1; transform: translateY(0); }
+        
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                position: absolute; top: 100%; left: 0; width: 100%;
+                background-color: rgba(22, 27, 34, 0.95);
+                backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                flex-direction: column; align-items: center; gap: 0; padding: 1rem 0;
+                max-height: 0; opacity: 0; overflow: hidden; pointer-events: none;
+                transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+            }
+            .nav-links.active { max-height: 500px; opacity: 1; pointer-events: auto; }
+            .nav-links li { width: 100%; text-align: center; }
+            .nav-links a { display: block; padding: 1rem; width: 100%; }
+            .nav-toggle { display: block; }
+            .nav-toggle .icon-close { display: none; }
+            .nav-toggle.active .icon-open { display: none; }
+            .nav-toggle.active .icon-close { display: block; }
+            .content-grid {
+                 grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+    <div class="content-wrapper">
+
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="#" class="nav-logo">Patutaa Project</a>
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="{{ url_for('home')}}">Home</a></li>
+                    <li><a href="{{url_for('impacts')}}">Impacts</a></li>
+                    <li><a href="{{url_for('analysis')}}">Analysis</a></li>
+                    <li><a href="{{url_for('emission')}}" class="active">Emissions</a></li>
+                    <li><a href="{{url_for('chatbot')}}">Chatbot</a></li>
+                </ul>
+                <button class="nav-toggle" id="nav-toggle" aria-label="toggle navigation" aria-expanded="false">
+                    <svg class="icon icon-open" xmlns="http://www.w.3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <svg class="icon icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </nav>
+
+        <main>
+            <section class="hero">
+                <h1><span>Understanding</span> <span>Emissions</span></h1>
+            </section>
+
+            <section class="main-section">
+                <div class="content-grid">
+
+                    <div class="card reveal">
+                        <div class="card-inner">
+                            <h2>Greenhouse Gases</h2>
+                            <ul>
+                                <li><b>Carbon Dioxide (CO₂):</b> Produced mainly from burning fossil fuels and deforestation.</li>
+                                <li><b>Methane (CH₄):</b> Released from agriculture, landfills, and fossil fuel production.</li>
+                                <li><b>Nitrous Oxide (N₂O):</b> Emitted from fertilizers, waste, and some industrial activities.</li>
+                                <li><b>Fluorinated gases:</b> Industrial chemicals with very high warming potential.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card reveal">
+                         <div class="card-inner">
+                            <h2>Major Sources</h2>
+                            <ul>
+                                <li>Energy sector – electricity, heat, and transportation.</li>
+                                <li>Industry – cement, steel, and chemical production.</li>
+                                <li>Agriculture – livestock and fertilizer use.</li>
+                                <li>Land-use change – deforestation and land degradation.</li>
+                                <li>Waste – decomposition of organic matter in landfills.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card reveal">
+                        <div class="card-inner">
+                           <h2>Solutions</h2>
+                           <p>Transitioning to renewable energy, improving energy efficiency, adopting sustainable agriculture, reforestation, and technological innovations like carbon capture can significantly reduce emissions.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </main>
+        
+        <footer class="footer reveal">
+            <p>&copy; 2025 Patutaa Project. All Rights Reserved.</p>
+            <div class="social-links">
+                <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
+                <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.65.64.7 1.028 1.595 1.028 2.688 0 3.848-2.338 4.695-4.566 4.942.359.308.678.92.678 1.852 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z"></path></svg></a>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navToggle = document.getElementById('nav-toggle');
+            const navLinks = document.getElementById('nav-links');
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                navToggle.classList.toggle('active');
+                const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                navToggle.setAttribute('aria-expanded', !isExpanded);
+            });
+
+            const navbar = document.querySelector('.navbar');
+            let lastScrollTop = 0;
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrollTop > lastScrollTop && scrollTop > navbar.offsetHeight) {
+                    navbar.classList.add('nav-hidden');
+                } else {
+                    navbar.classList.remove('nav-hidden');
+                }
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            });
+            
+            const revealElements = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+            revealElements.forEach(el => observer.observe(el));
+
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const { left, top, width, height } = card.getBoundingClientRect();
+                    const mouseX = e.clientX - left;
+                    const mouseY = e.clientY - top;
+                    const rotateX = (mouseY / height - 0.5) * -20;
+                    const rotateY = (mouseX / width - 0.5) * 20;
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'rotateX(0) rotateY(0)';
+                });
+            });
+
+            particlesJS("particles-js", {"particles":{"number":{"value":60,"density":{"enable":true,"value_area":800}},"color":{"value":"#38bdf8"},"shape":{"type":"circle"},"opacity":{"value":0.3,"random":true},"size":{"value":3,"random":true},"line_linked":{"enable":false},"move":{"enable":true,"speed":1,"direction":"none","random":true,"straight":false,"out_mode":"out","bounce":false}},"interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"bubble"},"onclick":{"enable":false}},"modes":{"bubble":{"distance":200,"size":5,"duration":2,"opacity":0.8}}}});
+        });
+    </script>
+</body>
+</html>

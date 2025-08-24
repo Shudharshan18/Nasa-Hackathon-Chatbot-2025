@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patutaa Climate Narrative: A Data Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='fav.png') }}">
+    <style>
+        :root {
+            --bg-color: #010409;
+            --primary-color: #38bdf8;
+            --secondary-color: #8b949e;
+            --card-bg: rgba(22, 27, 34, 0.6);
+            --border-color: rgba(255, 255, 255, 0.15);
+            --text-color: #e6edf3;
+            --heading-font: 'Lora', serif;
+            --body-font: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--body-font);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+        
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1; 
+        }
+
+        /* --- 1. Navbar --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(1, 4, 9, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            padding: 1rem 5%;
+            box-sizing: border-box;
+            transition: top 0.4s ease-in-out;
+        }
+
+        .navbar.nav-hidden {
+            top: -100px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.5rem;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: white;
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .nav-toggle .icon {
+            stroke: white;
+            width: 28px;
+            height: 28px;
+        }
+
+        /* --- Main Content Structure --- */
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+        
+        section {
+            padding: 100px 8%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* --- Scrollytelling Pinned Section --- */
+        .scrolly-container {
+            height: 300vh;
+            position: relative;
+        }
+        .scrolly-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        .scrolly-text {
+            font-family: var(--heading-font);
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            line-height: 1.3;
+            max-width: 900px;
+            position: absolute;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        /* --- Data Dashboard Section --- */
+        .dashboard-section {
+            padding-top: 150px;
+            padding-bottom: 150px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
+        .dashboard-text-content { text-align: left; }
+        .dashboard-text-content h2 {
+            font-family: var(--heading-font);
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+        .dashboard-text-content p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--secondary-color);
+        }
+        .dashboard-viz {
+            height: 400px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+        
+        .dashboard-viz img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .dashboard-viz:hover img {
+            transform: scale(1.05);
+        }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .reveal.in-view {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .cta-section {
+            text-align: center;
+            min-height: 60vh;
+        }
+        .cta-section h2 {
+            font-family: var(--heading-font);
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            margin-bottom: 2rem;
+        }
+        .cta-button {
+            background: var(--primary-color);
+            color: var(--bg-color);
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+        }
+
+        /* --- Responsive Navbar Styles --- */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: rgba(22, 27, 34, 0.95);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                flex-direction: column;
+                align-items: center;
+                gap: 0;
+                padding: 1rem 0;
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                pointer-events: none;
+                transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+            }
+            .nav-links.active {
+                max-height: 500px;
+                opacity: 1;
+                pointer-events: auto;
+            }
+            .nav-links li {
+                width: 100%;
+                text-align: center;
+            }
+            .nav-links a {
+                display: block;
+                padding: 1rem;
+                width: 100%;
+            }
+            .nav-toggle {
+                display: block;
+            }
+            .nav-toggle .icon-close { display: none; }
+            .nav-toggle.active .icon-open { display: none; }
+            .nav-toggle.active .icon-close { display: block; }
+            .dashboard-grid {
+                grid-template-columns: 1fr; /* Stack columns on mobile */
+            }
+            .dashboard-grid > div:first-child {
+                order: 2; /* Ensure text comes after image on mobile if needed */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">Team Patutaas</a>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('home')}}" class="active">Home</a></li>
+                <li><a href="{{url_for('impacts')}}">Impacts</a></li>
+                <li><a href="{{url_for('analysis')}}">Analysis</a></li>
+                <li><a href="{{url_for('emission')}}">Emissions</a></li>
+                <li><a href="{{url_for('chatbot')}}">Chatbot</a></li>
+            </ul>
+            <button class="nav-toggle" aria-label="toggle navigation" aria-expanded="false">
+                <svg class="icon icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg class="icon icon-close" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+    </nav>
+
+    <main class="content-wrapper">
+        <div class="scrolly-container">
+            <div class="scrolly-sticky">
+                <h1 class="scrolly-text" data-step="1">Our world is changing.</h1>
+                <h1 class="scrolly-text" data-step="2">The data tells a story.</h1>
+                <h1 class="scrolly-text" data-step="3">A story of numbers, nature, and humanity.</h1>
+                <h1 class="scrolly-text" data-step="4">Let's explore it together.</h1>
+                <h1 class="scrolly-text" data-step="5">Join Team Patutaas.</h1>
+            </div>
+        </div>
+
+        <section class="dashboard-section">
+            <div class="dashboard-grid reveal">
+                <div class="dashboard-text-content">
+                    <h2>Journey Through Our Climate</h2>
+                    <p>An immersive exploration of the data, impacts, and solutions shaping the future of our planet.</p>
+                </div>
+                <div class="dashboard-viz">
+                    <img src="https://images.theconversation.com/files/207919/original/file-20180226-140191-sbp9.jpg?ixlib=rb-4.1.0&q=20&auto=format&w=320&fit=clip&dpr=2&usm=12&cs=strip" alt="Climate data visualization">
+                </div>
+            </div>
+            
+            <div class="dashboard-grid reveal" style="margin-top: 8rem;">
+                 <div class="dashboard-viz">
+                    <img src="https://media.istockphoto.com/id/518628602/photo/air-pollution.jpg?s=612x612&w=0&k=20&c=eavIcpCWB00p1wQ8iHFJW2YT_R6cavEZSD2tj3EdzZ4=" alt="Industrial plant with smoke stacks representing CO2 emissions">
+                </div>
+                <div class="dashboard-text-content">
+                    <h2>Atmospheric CO₂</h2>
+                    <p>Carbon dioxide levels in the atmosphere are the highest they have been in human history, currently exceeding 420 parts per million. These greenhouse gases trap heat, driving global warming.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section reveal">
+            <h2>The future is not yet written.</h2>
+            <p style="max-width: 600px; margin: 0 auto 3rem auto; color: var(--secondary-color); font-size: 1.1rem;">The data provides clarity. Our actions provide hope. The time for change is now.</p>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Navbar Toggle ---
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                navToggle.classList.toggle('active');
+                const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                navToggle.setAttribute('aria-expanded', !isExpanded);
+            });
+
+            // --- Auto-hiding Navbar ---
+            const navbar = document.querySelector('.navbar');
+            let lastScrollTop = 0;
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrollTop > lastScrollTop && scrollTop > navbar.offsetHeight) {
+                    navbar.classList.add('nav-hidden');
+                } else {
+                    navbar.classList.remove('nav-hidden');
+                }
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            });
+
+            // --- Particles.js ---
+            particlesJS('particles-js', {
+                "particles": { "number": { "value": 80, "density": { "enable": true, "value_area": 800 } }, "color": { "value": "#38bdf8" }, "shape": { "type": "circle" }, "opacity": { "value": 0.5, "random": true }, "size": { "value": 3, "random": true }, "line_linked": { "enable": true, "distance": 150, "color": "#8b949e", "opacity": 0.2, "width": 1 }, "move": { "enable": true, "speed": 1, "direction": "none", "out_mode": "out" } },
+                "interactivity": { "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" } }, "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 0.5 } }, "push": { "particles_nb": 4 } } }
+            });
+
+            // --- Scrollytelling ---
+            const scrollyContainer = document.querySelector('.scrolly-container');
+            const textElements = document.querySelectorAll('.scrolly-text');
+            const totalSteps = textElements.length;
+            const updateText = (currentStep) => {
+                textElements.forEach(el => {
+                    const step = parseInt(el.dataset.step);
+                    if (step === currentStep) {
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    } else {
+                        el.style.opacity = '0';
+                        el.style.transform = step < currentStep ? 'translateY(-30px)' : 'translateY(30px)';
+                    }
+                });
+            };
+            window.addEventListener('scroll', () => {
+                const { top, height } = scrollyContainer.getBoundingClientRect();
+                if (top <= 0 && top > -height + window.innerHeight) {
+                    const scrollFraction = -top / (height - window.innerHeight);
+                    let currentStep = Math.ceil(scrollFraction * totalSteps);
+                    currentStep = Math.max(1, Math.min(totalSteps, currentStep));
+                    updateText(currentStep);
+                }
+            });
+            updateText(1);
+
+            // --- Reveal on Scroll ---
+            const revealElements = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.2 });
+            revealElements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climate Change - AI Chatbot</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        @property --angle {
+          syntax: '<angle>';
+          initial-value: 0deg;
+          inherits: false;
+        }
+
+        :root {
+            --bg-color: #010409;
+            --primary-color: #38bdf8;
+            --secondary-color: #8b949e;
+            --card-bg: #161b22;
+            --border-color: rgba(56, 189, 248, 0.2);
+            --text-color: #e6edf3;
+            --heading-font: 'Lora', serif;
+            --body-font: 'Poppins', sans-serif;
+            --glow-1: #0ea5e9;
+            --glow-2: #6366f1;
+            --glow-3: #a855f7;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--body-font);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .content-wrapper { position: relative; z-index: 2; }
+
+        /* --- 1. Navbar --- */
+        .navbar {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: rgba(1, 4, 9, 0.7);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000; padding: 1rem 5%; box-sizing: border-box;
+            transition: top 0.4s ease-in-out;
+        }
+        .navbar.nav-hidden { top: -100px; }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .nav-logo { color: var(--primary-color); font-weight: 700; font-size: 1.5rem; text-decoration: none; }
+        .nav-links { display: flex; list-style: none; margin: 0; padding: 0; gap: 2rem; align-items: center; }
+        .nav-links a { color: var(--secondary-color); text-decoration: none; font-weight: 600; padding: 0.5rem; transition: color 0.3s ease; }
+        .nav-links a:hover, .nav-links a.active { color: white; }
+        .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 0; }
+        .nav-toggle .icon { stroke: white; width: 28px; height: 28px; }
+        .nav-buttons button {
+            background: none; border: 1px solid var(--border-color); color: var(--secondary-color);
+            padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; margin-left: 1rem;
+        }
+        .nav-buttons button:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--bg-color);
+        }
+        
+        /* --- 2. Hero Section --- */
+        .hero {
+            position: relative;
+            height: 70vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+        }
+        .hero h1 {
+            font-family: var(--heading-font);
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            color: white; margin: 0; line-height: 1.2;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+
+        /* --- 3. Main Chat Section --- */
+        .main-section {
+            padding: 50px 5%;
+            max-width: 900px; margin: auto;
+        }
+        
+        /* --- 3D Aurora Card Styling --- */
+        .card {
+            --angle: 0deg;
+            position: relative; padding: 3px; border-radius: 15px;
+            background: conic-gradient(from var(--angle), var(--glow-3), var(--glow-2), var(--glow-1), var(--glow-2), var(--glow-3));
+            animation: rotate-glow 10s linear infinite; transform-style: preserve-3d;
+            transition: transform 0.4s ease-out, box-shadow 0.4s ease-out;
+            will-change: transform;
+        }
+        .card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        @keyframes rotate-glow { to { --angle: 360deg; } }
+        
+        .card-inner {
+            background: var(--card-bg); padding: 20px; border-radius: 12px;
+            height: 100%; box-sizing: border-box;
+            transform: translateZ(20px);
+        }
+
+        /* Chat Specific Layout */
+        .chat-container {
+            height: 65vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            max-width: 75%; padding: 12px 18px; border-radius: 18px;
+            line-height: 1.5;
+        }
+        .assistant {
+            align-self: flex-start;
+            background-color: #2c2f36;
+            border-bottom-left-radius: 4px;
+        }
+        .user {
+            align-self: flex-end;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            font-weight: 500;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .input-area-card { margin-top: 2rem; }
+        .input-area {
+            display: flex; gap: 10px;
+        }
+        .input-area input {
+            flex-grow: 1; border: 1px solid var(--border-color);
+            background: none; color: var(--text-color);
+            padding: 12px 15px; border-radius: 8px;
+            font-size: 1rem; outline: none; transition: border-color 0.3s ease;
+        }
+        .input-area input:focus { border-color: var(--primary-color); }
+        .input-area button {
+            border: none; background-color: var(--primary-color);
+            color: var(--bg-color); font-weight: 700;
+            padding: 12px 20px; border-radius: 8px;
+            cursor: pointer; transition: background-color 0.3s ease;
+        }
+        .input-area button:hover { background-color: #67caff; }
+        
+        /* --- ADDED: Typing indicator styles from original code --- */
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        .circle {
+            width: 10px;
+            height: 10px;
+            border: 2px solid var(--secondary-color);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: absolute; top: 100%; left: 0; width: 100%;
+                background-color: rgba(22, 27, 34, 0.95);
+                backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                flex-direction: column; align-items: center; gap: 0; padding: 1rem 0;
+                max-height: 0; opacity: 0; overflow: hidden; pointer-events: none;
+                transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+            }
+            .nav-links.active { max-height: 500px; opacity: 1; pointer-events: auto; }
+            .nav-links li { width: 100%; text-align: center; }
+            .nav-links a { display: block; padding: 1rem; width: 100%; }
+            .nav-toggle { display: block; }
+            .nav-toggle .icon-close { display: none; }
+            .nav-toggle.active .icon-open { display: none; }
+            .nav-toggle.active .icon-close { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+    <div class="content-wrapper">
+
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="#" class="nav-logo">Patutaa Project</a>
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="{{ url_for('home')}}">Home</a></li>
+                    <li><a href="{{url_for('impacts')}}">Impacts</a></li>
+                    <li><a href="{{url_for('analysis')}}">Analysis</a></li>
+                    <li><a href="{{url_for('emission')}}">Emissions</a></li>
+                    <li><a href="{{url_for('chatbot')}}" class="active">Chatbot</a></li>
+                </ul>
+                <div class="nav-buttons">
+                    <button onclick="toggleTheme()">Theme</button>
+                    <button onclick="clearChat()">Clear</button>
+                </div>
+                <button class="nav-toggle" id="nav-toggle" aria-label="toggle navigation" aria-expanded="false">
+                    </button>
+            </div>
+        </nav>
+
+        <main>
+            <section class="hero">
+                <h1>AI Chatbot</h1>
+            </section>
+
+            <section class="main-section">
+                <div class="card reveal">
+                    <div class="card-inner chat-container">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="message assistant">How can I help you explore climate data?</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card reveal input-area-card">
+                    <div class="card-inner">
+                        <div class="input-area">
+                            <input type="text" id="user-input" placeholder="Ask about emissions, impacts, solutions...">
+                            <button onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        // Your original chatbot JavaScript logic
+        async function sendMessage() {
+            const input = document.getElementById("user-input");
+            const msg = input.value.trim();
+            if (msg === "") return;
+
+            const chatBox = document.getElementById("chat-messages");
+
+            const userMsg = document.createElement("div");
+            userMsg.classList.add("message", "user");
+            userMsg.innerText = msg;
+            chatBox.appendChild(userMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            input.value = "";
+
+            // --- MODIFIED: Restored original typing indicator ---
+            const typingIndicator = document.createElement("div");
+            typingIndicator.classList.add("message", "assistant", "typing");
+            typingIndicator.innerHTML = '<div class="circle"></div> Assistant is typing...';
+            chatBox.appendChild(typingIndicator);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/ask", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: msg })
+                });
+
+                const data = await response.json();
+                chatBox.removeChild(typingIndicator);
+
+                const assistantMsg = document.createElement("div");
+                assistantMsg.classList.add("message", "assistant");
+                
+                if (data.type === "graph" && Array.isArray(data.reply)) {
+                    // This is a simplified handler. You'd need to add your full
+                    // Chart.js logic here if you want to render charts in the chat.
+                    assistantMsg.innerHTML = "📊 Graph data received. Chart rendering logic needed here.";
+                } else if (Array.isArray(data.reply) && data.reply.length > 0 && typeof data.reply[0] === "object") {
+                     let table = "<table style='width:100%;font-size:14px; border-collapse:collapse; margin-top:5px;'>";
+                     table += "<tr>";
+                     for (const key of Object.keys(data.reply[0])) {
+                         table += `<th style='border:1px solid #555; padding:8px;'>${key}</th>`;
+                     }
+                     table += "</tr>";
+
+                     for (const row of data.reply) {
+                         table += "<tr>";
+                         for (const val of Object.values(row)) {
+                             table += `<td style='border:1px solid #555; padding:8px;'>${val}</td>`;
+                         }
+                         table += "</tr>";
+                     }
+                     table += "</table>";
+
+                     assistantMsg.innerHTML = table;
+                } else {
+                    assistantMsg.innerText = data.reply || "No response from server.";
+                }
+
+                chatBox.appendChild(assistantMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (err) {
+                console.error("Error:", err);
+                typingIndicator.innerText = "⚠ Error connecting to server.";
+            }
+        }
+
+        function toggleTheme() {
+            // This would need to be re-written to work with the new CSS variable structure
+            console.log("Theme toggle clicked. Implement theme switching logic here.");
+        }
+
+        function clearChat() {
+            document.getElementById("chat-messages").innerHTML = '<div class="message assistant">How can I help you explore climate data?</div>';
+        }
+
+        document.getElementById("user-input").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+
+        // Template Scripts (Navbar, Particles, Reveal, 3D Tilt)
+        document.addEventListener('DOMContentLoaded', () => {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            if (navToggle) {
+                navToggle.addEventListener('click', () => {
+                    navLinks.classList.toggle('active');
+                    navToggle.classList.toggle('active');
+                    navToggle.setAttribute('aria-expanded', navLinks.classList.contains('active'));
+                });
+            }
+
+            const navbar = document.querySelector('.navbar');
+            let lastScrollTop = 0;
+            window.addEventListener('scroll', () => {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrollTop > lastScrollTop && scrollTop > navbar.offsetHeight) {
+                    navbar.classList.add('nav-hidden');
+                } else {
+                    navbar.classList.remove('nav-hidden');
+                }
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            });
+            
+            const revealElements = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+            revealElements.forEach(el => observer.observe(el));
+
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const { left, top, width, height } = card.getBoundingClientRect();
+                    const mouseX = e.clientX - left; const mouseY = e.clientY - top;
+                    const rotateX = (mouseY / height - 0.5) * -10;
+                    const rotateY = (mouseX / width - 0.5) * 10;
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+                card.addEventListener('mouseleave', () => { card.style.transform = 'rotateX(0) rotateY(0)'; });
+            });
+
+            particlesJS("particles-js", {"particles":{"number":{"value":60,"density":{"enable":true,"value_area":800}},"color":{"value":"#38bdf8"},"shape":{"type":"circle"},"opacity":{"value":0.3,"random":true},"size":{"value":3,"random":true},"line_linked":{"enable":false},"move":{"enable":true,"speed":1,"direction":"none","random":true,"straight":false,"out_mode":"out","bounce":false}},"interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"bubble"},"onclick":{"enable":false}},"modes":{"bubble":{"distance":200,"size":5,"duration":2,"opacity":0.8}}}});
+        });
+
+    </script>
+</body>
+</html>

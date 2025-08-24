@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat UI</title>
+    <link rel="icon" type="image/png" href="Favicon1 (1).png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #0E0E11;
+            color: white;
+            height: 100vh;
+        }
+
+        .navbar{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #161b22;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.1rem 2rem;
+            z-index: 1000;
+            color: #58a6ff;
+        }
+
+        .navbar-left span {
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-left: 12rem;
+        }
+
+        .navbar-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .navbar-links a {
+            color: #8b949e;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .navbar-links a:hover,
+        .navbar-links a.active{
+             color: #58a6ff;
+        }
+
+        .navbar button {
+            margin-left: 8px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background: #58a6ff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .btn {
+            margin-right: 35px;
+        }
+
+        .navbar button:hover {
+            background-color: #2461a7;
+        }
+
+        .main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 90%;
+            height: 75%;
+            background-color: #1E1E24;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin-top: 60px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .assistant {
+            align-self: flex-start;
+            background-color: #2c2f36;
+            border-radius: 12px 12px 12px 0;
+        }
+
+        .user {
+            align-self: flex-end;
+            background-color: #3a3f47;
+            border-radius: 12px 12px 0 12px;
+        }
+
+        .input-area {
+            display: flex;
+            border-top: 1px solid #333;
+            background-color: #1E1E24;
+            padding: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            background-color: #2c2f36;
+            color: white;
+        }
+
+        .input-area button {
+            margin-left: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #58a6ff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .input-area button:hover {
+            background-color: #2461a7;
+        }
+
+        .light-mode {
+            background-color: #f2f2f2;
+            color: black;
+        }
+
+        .light-mode .navbar {
+            background-color: #cce5cc;
+            color: black;
+        }
+
+        .light-mode .navbar-links a {
+            color: #155724;
+        }
+
+        .light-mode .navbar-links a:hover {
+            background-color: #a9dca9;
+        }
+
+        .light-mode .chat-container {
+            background-color: #fff;
+            color: black;
+        }
+
+        .light-mode .assistant {
+            background-color: #e0e0e0;
+        }
+
+        .light-mode .user {
+            background-color: #cce5ff;
+        }
+
+        .light-mode .input-area {
+            background-color: #eee;
+        }
+
+        .light-mode .input-area input {
+            background-color: #ddd;
+            color: black;
+        }
+
+        /* Typing indicator */
+        .typing {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .circle {
+            width: 10px;
+            height: 10px;
+            border: 2px solid #aaa;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <span>😼 PatutaaAI</span>
+        </div>
+        <div class="navbar-links">
+            <a href="{{ url_for('home')}}">Home</a>
+            <a href="{{url_for('impacts')}}">Impacts</a>
+            <a href="{{url_for('analysis')}}">Analysis</a>
+            <a href="{{url_for('emission')}}">Emissions</a>
+            <a href="{{url_for('chatbot')}}" class="active">Chatbot</a>
+        </div>
+        <div>
+            <button onclick="toggleTheme()">Theme</button>
+            <button class="btn" onclick="clearChat()">Clear</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <div class="message assistant">How can I help?</div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Type a message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+<script>
+    async function sendMessage() {
+        const input = document.getElementById("user-input");
+        const msg = input.value.trim();
+        if (msg === "") return;
+
+        const chatBox = document.getElementById("chat-messages");
+
+        // Add user message
+        const userMsg = document.createElement("div");
+        userMsg.classList.add("message", "user");
+        userMsg.innerText = msg;
+        chatBox.appendChild(userMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        input.value = "";
+
+        // --- Add Typing Indicator ---
+        const typingIndicator = document.createElement("div");
+        typingIndicator.classList.add("message", "assistant", "typing");
+        typingIndicator.innerHTML = '<div class="circle"></div> Assistant is typing...';
+        chatBox.appendChild(typingIndicator);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch("http://127.0.0.1:5000/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: msg })
+            });
+
+            const data = await response.json();
+            console.log("Response from backend:", data.reply);
+
+            // Remove typing indicator
+            chatBox.removeChild(typingIndicator);
+
+            // Show assistant reply
+            const assistantMsg = document.createElement("div");
+            assistantMsg.classList.add("message", "assistant");
+            assistantMsg.innerText = data.reply || "No response from server.";
+            chatBox.appendChild(assistantMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (err) {
+            console.error("Error:", err);
+
+            // Remove typing indicator
+            chatBox.removeChild(typingIndicator);
+
+            // Show error message
+            const errorMsg = document.createElement("div");
+            errorMsg.classList.add("message", "assistant");
+            errorMsg.innerText = "⚠ Error connecting to server.";
+            chatBox.appendChild(errorMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle("light-mode");
+    }
+
+    function clearChat() {
+        document.getElementById("chat-messages").innerHTML = "";
+    }
+
+    document.getElementById("user-input").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>
