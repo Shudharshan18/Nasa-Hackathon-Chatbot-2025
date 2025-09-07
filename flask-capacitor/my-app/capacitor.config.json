@@ -1,0 +1,9 @@
+{
+  "appId": "com.example.app",
+  "appName": "Patutta",
+  "webDir": "dist",
+  "server": {
+    "url": "https://ae830c684922.ngrok-free.app",
+    "cleartext": true
+  }
+}
